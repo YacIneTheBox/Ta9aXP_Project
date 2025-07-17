@@ -7,7 +7,7 @@
 using namespace std;
 
 typedef enum GameScene {
-	Desktop,
+	Desktop = 0,
 	Paint,
 	Calculator,
 }GameScene;
@@ -15,14 +15,23 @@ typedef enum GameScene {
 typedef struct App {
 	string name;
 	GameScene scene;
-	//Image icon;// pour l'instant on mets color
+	//Image icon;// for now we put color instead of icon
 	Color iconColor = LIGHTGRAY;
 	Rectangle posSize = {0,0,60 ,60 };
 
 }App;
 
-void CollisionSelectingApp(GameScene* currentScene, Vector2 pos1, App app);
-void InitializeDesktopScene(App* apps, int appCount);
+typedef struct Brick {
+	Rectangle rect;
+	bool isoccupied = false;
+	bool isSelected = false; // Pour savoir si le bloc est sélectionné
+	App app; // l'application qui occupe le bloc
+}Brick;
+
+void CollisionSelectingApp(GameScene* currentScene, Vector2 mousePos, Brick& bloc);
+void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL);
+void GoBack(GameScene& currentScene);
+
 
 int main()
 {
@@ -40,15 +49,28 @@ int main()
 
 	int nombreApp = 3;
 	App *AllApps = new App[nombreApp]{
-		{"Desktop", Desktop, RED, {SCREEN_WIDTH / 16, SCREEN_HEIGHT / 12,60 ,60}},
-		{"Paint", Paint, BLUE, {SCREEN_WIDTH / 16 * 2, SCREEN_HEIGHT / 12,60 ,60}},
-		{"Calculator", Calculator, YELLOW, {SCREEN_WIDTH / 16 * 3, SCREEN_HEIGHT / 12,60 ,60}}
+		{"Desktop", Desktop, RED},
+		{"Paint", Paint, BLUE},
+		{"Calculator", Calculator, YELLOW}
 	};
 
+	Brick* blocks = new Brick[N_BLOCKS_HORIZONTAL * N_BLOCKS_VERTICAL];
+	for (int row = 0 ; row < N_BLOCKS_VERTICAL; row++) {
+		for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
+			blocks[row * N_BLOCKS_HORIZONTAL + col].rect = {
+				(float)(col * BLOCK_SIZE),
+				(float)(row * BLOCK_SIZE),
+				(float)BLOCK_SIZE,
+				(float)BLOCK_SIZE
+			};
+			blocks[row * N_BLOCKS_HORIZONTAL + col].isoccupied = false;
+		}
+	}
+
+	//InitializeDesktopScene(AllApps,nombreApp,blocks,N_BLOCKS_HORIZONTAL,N_BLOCKS_VERTICAL);
 
 
-
-	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ta9aXP");
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ta9a XP");
 
 	SetTargetFPS(60);
 
@@ -57,13 +79,25 @@ int main()
 		switch (currentScene) {
 			case Desktop:
 			{
-				for (int i = 0; i < nombreApp; i++) {
-					CollisionSelectingApp(&currentScene, GetMousePosition(), AllApps[i]);
+				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
+					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
+						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK);
+					}
 				}
 				
+				for (int i = 0; i < N_BLOCKS_VERTICAL* N_BLOCKS_HORIZONTAL; i++) {
+					CollisionSelectingApp(&currentScene, GetMousePosition(), blocks[i]);
+				}
+				
+				break;
 			}
 			case Paint: {
-
+				GoBack(currentScene);
+				break;
+			}
+			case Calculator: {
+				GoBack(currentScene);
+				break;
 			}
 		}
 
@@ -73,16 +107,18 @@ int main()
 		switch (currentScene) {
 			case Desktop: {
 				ClearBackground(DARKGREEN);
-				for (int i = 0; i < nombreApp; i++) {
-					DrawRectangleRec(AllApps[i].posSize, AllApps[i].iconColor);
-					cout << "App: " << AllApps[i].name << " at position: " << AllApps[i].posSize.x << ", " << AllApps[i].posSize.y << endl;
-				}
-				
+				InitializeDesktopScene(AllApps, nombreApp, blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL);
 				break;
 			}
 			case Paint: {
 				cout << "you are in Paint mode!" << endl;
 				ClearBackground(DARKBLUE);
+				DrawText("Paint Mode", 10, 10, 20, WHITE);
+				break;
+			}
+			case Calculator: {
+				ClearBackground(GRAY);
+				DrawText("Calculator Mode", 10, 10, 20, BLACK);
 				break;
 			}
 		}
@@ -94,18 +130,32 @@ int main()
 
 	return 0;
 }
-void InitializeDesktopScene(App *apps, int appCount) {
-	for (int i = 0; i < appCount; i++) {
-		DrawRectangleRec(apps[i].posSize, apps[i].iconColor);
+void InitializeDesktopScene(App *AllApps, int nombreApp,Brick* blocks,int N_BLOCKS_HORIZONTAL,int N_BLOCKS_VERTICAL) {
+	int row = 0, col = 0;
+	int idx = 0;
+	for (int i = 0; i < nombreApp; i++) {
+		idx = row + i * N_BLOCKS_HORIZONTAL + col;
+		AllApps[i].posSize = blocks[idx].rect;
+		blocks[idx].app = AllApps[i];
+		blocks[idx].isoccupied = true;
+		if (i >= N_BLOCKS_VERTICAL) {
+			col++;
+		}
+		DrawRectangleRec(blocks[idx].rect, AllApps[i].iconColor);
 	}
 }
 
-void CollisionSelectingApp(GameScene *currentScene,Vector2 pos1,App app) {
-	if (CheckCollisionPointRec(pos1,app.posSize) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			*currentScene = app.scene;	
+void CollisionSelectingApp(GameScene *currentScene,Vector2 mousePos,Brick& bloc) {
+
+	if (CheckCollisionPointRec(mousePos,bloc.rect) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && bloc.isoccupied) {
+		bloc.isSelected = true;
+		*currentScene = bloc.app.scene;		
 	}
-	else {
-		cout << "No collision." << endl;
+}
+
+void GoBack(GameScene& currentScene) {
+	if (IsKeyPressed(KEY_SPACE)) {
+		currentScene = Desktop;
 	}
 }
 
