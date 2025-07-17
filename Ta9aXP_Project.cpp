@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <raylib.h>
+#include <cmath>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ void CollisionSelectingApp(GameScene* currentScene, Vector2 mousePos, Brick& blo
 void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL);
 void GoBack(GameScene& currentScene);
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
+int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos);
 
 int main()
 {
@@ -78,14 +80,23 @@ int main()
 
 	SetTargetFPS(60);
 
-	while (!WindowShouldClose()) {
+	for (int i = 0; i < nombreApp; i++) {
+		int col = i / N_BLOCKS_VERTICAL;
+		int row = i % N_BLOCKS_VERTICAL;
+		int idx = row * N_BLOCKS_HORIZONTAL + col;
 
+		AllApps[i].posSize = blocks[idx].rect;
+		blocks[idx].app = AllApps[i];
+		blocks[idx].isoccupied = true;
+	}
+
+	while (!WindowShouldClose()) {
 		switch (currentScene) {
 			case Desktop:
 			{
 				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
 					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
-						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK);
+						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
 						MovingApps(AllApps,N_BLOCKS_VERTICAL,N_BLOCKS_HORIZONTAL, blocks);
 					}
 				}
@@ -136,30 +147,22 @@ int main()
 	return 0;
 }
 void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL) {
-	for (int i = 0; i < nombreApp; i++) {
-		// Calculer la colonne et la ligne
-		int col = i / N_BLOCKS_VERTICAL; // colonne courante
-		int row = i % N_BLOCKS_VERTICAL; // ligne courante
-
-		int idx = row * N_BLOCKS_HORIZONTAL + col;
-
-		AllApps[i].posSize = blocks[idx].rect;
-		blocks[idx].app = AllApps[i];
-		blocks[idx].isoccupied = true;
-
-		DrawRectangleRec(blocks[idx].rect, AllApps[i].iconColor);
+	for (int i = 0; i < N_BLOCKS_HORIZONTAL * N_BLOCKS_VERTICAL; i++) {
+		if (blocks[i].isoccupied) {
+			DrawRectangleRec(blocks[i].app.posSize, blocks[i].app.iconColor);
+		}
 	}
 }
 
-void MovingApps(App* AllApps,int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL,Brick* blocks) {
-	static int selectedBlockIndex = -1; // Index du bloc sélectionné
+void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks) {
+	static int selectedBlockIndex = -1;
 	Vector2 mousePos = GetMousePosition();
 
 	if (selectedBlockIndex == -1) {
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
-				if (CheckCollisionPointRec(mousePos, AllApps[i].posSize)) {
-					selectedBlockIndex = i; // Marquer le bloc comme sélectionné
+				if (blocks[i].isoccupied && CheckCollisionPointRec(mousePos, blocks[i].app.posSize)) {
+					selectedBlockIndex = i;
 					break;
 				}
 			}
@@ -167,16 +170,36 @@ void MovingApps(App* AllApps,int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL,Bric
 	}
 	if (selectedBlockIndex != -1) {
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			AllApps[selectedBlockIndex].posSize.x = mousePos.x - blocks[selectedBlockIndex].rect.width / 2;
-			AllApps[selectedBlockIndex].posSize.y = mousePos.y - blocks[selectedBlockIndex].rect.height / 2;
+			blocks[selectedBlockIndex].app.posSize.x = mousePos.x - blocks[selectedBlockIndex].app.posSize.width / 2;
+			blocks[selectedBlockIndex].app.posSize.y = mousePos.y - blocks[selectedBlockIndex].app.posSize.height / 2;
 		}
 		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-			blocks[selectedBlockIndex].isSelected = false; // Désélectionner le bloc
-			selectedBlockIndex = -1; // Réinitialiser l'index du bloc sélectionné
-			cout << "bro dropped it" << endl;
+			Vector2 appCenter = {
+				blocks[selectedBlockIndex].app.posSize.x + blocks[selectedBlockIndex].app.posSize.width / 2,
+				blocks[selectedBlockIndex].app.posSize.y + blocks[selectedBlockIndex].app.posSize.height / 2
+			};
+			int closestIdx = ClosestPoint(blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL, appCenter);
+
+			if (closestIdx == -1 || closestIdx == selectedBlockIndex) {
+				// Pas de bloc cible valide ou on relâche sur le même bloc
+				blocks[selectedBlockIndex].app.posSize = blocks[selectedBlockIndex].rect; // Snap back
+			}
+			else if (blocks[closestIdx].isoccupied) {
+				// Bloc cible occupé, refuse le move
+				blocks[selectedBlockIndex].app.posSize = blocks[selectedBlockIndex].rect; // Snap back
+			}
+			else {
+				// Déplacement autorisé
+				blocks[closestIdx].app = blocks[selectedBlockIndex].app;
+				blocks[closestIdx].app.posSize = blocks[closestIdx].rect; // Snap à la grille du nouveau bloc
+				blocks[closestIdx].isoccupied = true;
+
+				blocks[selectedBlockIndex].isoccupied = false;
+			}
+			blocks[selectedBlockIndex].isSelected = false;
+			selectedBlockIndex = -1;
 		}
 	}
-	// gerer le deplacement des application a travers les blocs
 }
 
 void CollisionSelectingApp(GameScene *currentScene,Vector2 mousePos,Brick& bloc) {
@@ -201,10 +224,14 @@ void GoBack(GameScene& currentScene) {
 	}
 }
 
-Vector2 ClosestPoint(Brick block, Vector2 rect) {
-	Vector2 closestPoint = { 0, 0 };
-	closestPoint.x = block.rect.width / 2  ;
-
-	return closestPoint;
+int ClosestPoint(Brick* blocks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos) {
+	// On cherche le bloc dont le rect contient le centre de l'app
+	for (int i = 0; i < N_BLOCK_HORIZONTAL * N_BLOCK_VERTICAL; i++) {
+		if (CheckCollisionPointRec(appPos, blocks[i].rect)) {
+			return i;
+		}
+	}
+	// Si aucun bloc ne contient la position, retourne -1
+	return -1;
 }
 
