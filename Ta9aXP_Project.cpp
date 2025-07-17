@@ -26,12 +26,13 @@ typedef struct Brick {
 	bool isoccupied = false;
 	bool isSelected = false; // Pour savoir si le bloc est sélectionné
 	App app; // l'application qui occupe le bloc
+	float lastClickTime = 0.0f;
 }Brick;
 
 void CollisionSelectingApp(GameScene* currentScene, Vector2 mousePos, Brick& bloc);
 void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL);
 void GoBack(GameScene& currentScene);
-
+void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 
 int main()
 {
@@ -85,6 +86,7 @@ int main()
 				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
 					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
 						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK);
+						MovingApps(AllApps,N_BLOCKS_VERTICAL,N_BLOCKS_HORIZONTAL, blocks);
 					}
 				}
 				
@@ -149,11 +151,47 @@ void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BL
 	}
 }
 
-void CollisionSelectingApp(GameScene *currentScene,Vector2 mousePos,Brick& bloc) {
+void MovingApps(App* AllApps,int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL,Brick* blocks) {
+	static int selectedBlockIndex = -1; // Index du bloc sélectionné
+	Vector2 mousePos = GetMousePosition();
 
-	if (CheckCollisionPointRec(mousePos,bloc.rect) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && bloc.isoccupied) {
-		bloc.isSelected = true;
-		*currentScene = bloc.app.scene;		
+	if (selectedBlockIndex == -1) {
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
+				if (CheckCollisionPointRec(mousePos, AllApps[i].posSize)) {
+					selectedBlockIndex = i; // Marquer le bloc comme sélectionné
+					break;
+				}
+			}
+		}
+	}
+	if (selectedBlockIndex != -1) {
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			AllApps[selectedBlockIndex].posSize.x = mousePos.x - blocks[selectedBlockIndex].rect.width / 2;
+			AllApps[selectedBlockIndex].posSize.y = mousePos.y - blocks[selectedBlockIndex].rect.height / 2;
+		}
+		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+			blocks[selectedBlockIndex].isSelected = false; // Désélectionner le bloc
+			selectedBlockIndex = -1; // Réinitialiser l'index du bloc sélectionné
+			cout << "bro dropped it" << endl;
+		}
+	}
+	// gerer le deplacement des application a travers les blocs
+}
+
+void CollisionSelectingApp(GameScene *currentScene,Vector2 mousePos,Brick& bloc) {
+	float currentTime = GetTime();
+	if (CheckCollisionPointRec(mousePos,bloc.rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && bloc.isoccupied) {
+		
+		if (currentTime - bloc.lastClickTime < 0.25f) {
+			// Double click detected
+			*currentScene = bloc.app.scene;
+			bloc.lastClickTime = 0.0f; // Reset last click time
+
+		}
+		else {
+			bloc.lastClickTime = currentTime; // Update last click time
+		}
 	}
 }
 
@@ -161,5 +199,12 @@ void GoBack(GameScene& currentScene) {
 	if (IsKeyPressed(KEY_SPACE)) {
 		currentScene = Desktop;
 	}
+}
+
+Vector2 ClosestPoint(Brick block, Vector2 rect) {
+	Vector2 closestPoint = { 0, 0 };
+	closestPoint.x = block.rect.width / 2  ;
+
+	return closestPoint;
 }
 
