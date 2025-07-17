@@ -7,7 +7,24 @@
 using namespace std;
 int main()
 {
+	const int SCREEN_WIDTH = 1200;
+	const int SCREEN_HEIGHT = 800;
     
-    cout << "hello salem";
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ta9aXP");
+
+	SetTargetFPS(60);
+
+	while (!WindowShouldClose()) {
+
+
+		BeginDrawing();
+		ClearBackground(RAYWHITE);
+
+		EndDrawing();
+	}
+
+	CloseWindow();
+
+	return 0;
 }
 
