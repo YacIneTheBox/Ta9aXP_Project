@@ -47,11 +47,17 @@ int main()
 	Rectangle taskBarPos = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 	Color TaskbarColor = DARKGRAY;
 
-	int nombreApp = 3;
+	int nombreApp =9;
 	App *AllApps = new App[nombreApp]{
 		{"Desktop", Desktop, RED},
 		{"Paint", Paint, BLUE},
-		{"Calculator", Calculator, YELLOW}
+		{"Calculator", Calculator, YELLOW},
+		{ "Desktop", Desktop, RED },
+		{"Paint", Paint, BLUE},
+		{"Calculator", Calculator, YELLOW},
+		{ "Desktop", Desktop, RED },
+		{"Paint", Paint, BLUE},
+		{"Calculator", Calculator, YELLOW},
 	};
 
 	Brick* blocks = new Brick[N_BLOCKS_HORIZONTAL * N_BLOCKS_VERTICAL];
@@ -66,9 +72,6 @@ int main()
 			blocks[row * N_BLOCKS_HORIZONTAL + col].isoccupied = false;
 		}
 	}
-
-	//InitializeDesktopScene(AllApps,nombreApp,blocks,N_BLOCKS_HORIZONTAL,N_BLOCKS_VERTICAL);
-
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ta9a XP");
 
@@ -130,17 +133,18 @@ int main()
 
 	return 0;
 }
-void InitializeDesktopScene(App *AllApps, int nombreApp,Brick* blocks,int N_BLOCKS_HORIZONTAL,int N_BLOCKS_VERTICAL) {
-	int row = 0, col = 0;
-	int idx = 0;
+void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL) {
 	for (int i = 0; i < nombreApp; i++) {
-		idx = row + i * N_BLOCKS_HORIZONTAL + col;
+		// Calculer la colonne et la ligne
+		int col = i / N_BLOCKS_VERTICAL; // colonne courante
+		int row = i % N_BLOCKS_VERTICAL; // ligne courante
+
+		int idx = row * N_BLOCKS_HORIZONTAL + col;
+
 		AllApps[i].posSize = blocks[idx].rect;
 		blocks[idx].app = AllApps[i];
 		blocks[idx].isoccupied = true;
-		if (i >= N_BLOCKS_VERTICAL) {
-			col++;
-		}
+
 		DrawRectangleRec(blocks[idx].rect, AllApps[i].iconColor);
 	}
 }
