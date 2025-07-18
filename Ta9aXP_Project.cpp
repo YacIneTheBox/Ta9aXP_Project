@@ -33,17 +33,6 @@ typedef struct Brick {
 	float lastClickTime = 0.0f;
 }Brick;
 
-typedef struct WindowSim {
-	Rectangle bounds = { 0,0,0,0 };
-	bool isActive = false; // fais le focus
-	bool isMinimized = false; // pour minimiser la fenêtre
-	bool isMaximized = false; // pour maximiser la fenêtre
-	bool isDragging = false; // pour le drag and drop
-	bool isResizable = false; // pour redimensionner la fenêtre
-	Vector2 dragOffset = { 0,0 }; // pour le drag and drop
-	string title;
-	App app; // l'application associée à la fenêtre
-}WindomSim;
 
 
 void CollisionSelectingApp(GameScene* currentScene, Vector2 mousePos, Brick& bloc);
@@ -65,12 +54,6 @@ int main()
 
 	Rectangle taskBarPos = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 	Color TaskbarColor = DARKGRAY;
-	
-	WindomSim AllWindows[3] = {
-		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Desktop", { "Desktop", Desktop, RED } },
-		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Paint", { "Paint", Paint, BLUE } },
-		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Calculator", { "Calculator", Calculator, YELLOW } }
-	};
 
 	int nombreApp =9;
 	App *AllApps = new App[nombreApp]{
