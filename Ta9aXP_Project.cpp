@@ -4,7 +4,10 @@
 #include <iostream>
 #include <raylib.h>
 #include <cmath>
-
+#include <string>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 using namespace std;
 
 typedef enum GameScene {
@@ -23,12 +26,25 @@ typedef struct App {
 }App;
 
 typedef struct Brick {
-	Rectangle rect;
+	Rectangle rect = {0,0,0,0};
 	bool isoccupied = false;
 	bool isSelected = false; // Pour savoir si le bloc est sélectionné
 	App app; // l'application qui occupe le bloc
 	float lastClickTime = 0.0f;
 }Brick;
+
+typedef struct WindowSim {
+	Rectangle bounds = { 0,0,0,0 };
+	bool isActive = false; // fais le focus
+	bool isMinimized = false; // pour minimiser la fenêtre
+	bool isMaximized = false; // pour maximiser la fenêtre
+	bool isDragging = false; // pour le drag and drop
+	bool isResizable = false; // pour redimensionner la fenêtre
+	Vector2 dragOffset = { 0,0 }; // pour le drag and drop
+	string title;
+	App app; // l'application associée à la fenêtre
+}WindomSim;
+
 
 void CollisionSelectingApp(GameScene* currentScene, Vector2 mousePos, Brick& bloc);
 void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BLOCKS_HORIZONTAL, int N_BLOCKS_VERTICAL);
@@ -49,6 +65,12 @@ int main()
 
 	Rectangle taskBarPos = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 	Color TaskbarColor = DARKGRAY;
+	
+	WindomSim AllWindows[3] = {
+		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Desktop", { "Desktop", Desktop, RED } },
+		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Paint", { "Paint", Paint, BLUE } },
+		{ { 0, 0, 300, 300 }, false, false, false, false, false, { 0, 0 }, "Calculator", { "Calculator", Calculator, YELLOW } }
+	};
 
 	int nombreApp =9;
 	App *AllApps = new App[nombreApp]{
@@ -91,15 +113,23 @@ int main()
 	}
 
 	while (!WindowShouldClose()) {
+		time_t now = time(nullptr);
+		struct tm tstruct;
+		localtime_s(&tstruct, &now); // Version sécurisée pour Windows/Visual Studio
+
+		// Formater l'heure dans une string C++
+		std::ostringstream oss;
+		oss << std::put_time(&tstruct, "%H:%M:%S");
+		std::string heure = oss.str();
 		switch (currentScene) {
 			case Desktop:
 			{
 				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
 					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
-						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
-						MovingApps(AllApps,N_BLOCKS_VERTICAL,N_BLOCKS_HORIZONTAL, blocks);
+						//DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
 					}
 				}
+				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				
 				for (int i = 0; i < N_BLOCKS_VERTICAL* N_BLOCKS_HORIZONTAL; i++) {
 					CollisionSelectingApp(&currentScene, GetMousePosition(), blocks[i]);
@@ -109,17 +139,22 @@ int main()
 			}
 			case Paint: {
 				GoBack(currentScene);
+				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				break;
 			}
 			case Calculator: {
 				GoBack(currentScene);
+				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				break;
 			}
 		}
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
+		// Draws that always appear
 		DrawRectangleRec(taskBarPos, TaskbarColor);
+		DrawText(heure.c_str(), SCREEN_WIDTH - SCREEN_WIDTH/14, SCREEN_HEIGHT - SCREEN_HEIGHT/25,20, WHITE);
+
 		switch (currentScene) {
 			case Desktop: {
 				ClearBackground(DARKGREEN);
@@ -161,7 +196,7 @@ void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Br
 	if (selectedBlockIndex == -1) {
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
-				if (blocks[i].isoccupied && CheckCollisionPointRec(mousePos, blocks[i].app.posSize)) {
+				if (blocks[i].isoccupied && CheckCollisionCircleRec(mousePos,10 ,blocks[i].app.posSize)) {
 					selectedBlockIndex = i;
 					break;
 				}
