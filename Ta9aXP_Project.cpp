@@ -4,10 +4,7 @@
 #include <iostream>
 #include <raylib.h>
 #include <cmath>
-#include <string>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
+
 using namespace std;
 
 typedef enum GameScene {
@@ -94,23 +91,15 @@ int main()
 	}
 
 	while (!WindowShouldClose()) {
-		time_t now = time(nullptr);
-		struct tm tstruct;
-		localtime_s(&tstruct, &now); // Version sécurisée pour Windows/Visual Studio
-
-		// Formater l'heure dans une string C++
-		std::ostringstream oss;
-		oss << std::put_time(&tstruct, "%H:%M:%S");
-		std::string heure = oss.str();
 		switch (currentScene) {
 			case Desktop:
 			{
 				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
 					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
-						//DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
+						DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
+						MovingApps(AllApps,N_BLOCKS_VERTICAL,N_BLOCKS_HORIZONTAL, blocks);
 					}
 				}
-				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				
 				for (int i = 0; i < N_BLOCKS_VERTICAL* N_BLOCKS_HORIZONTAL; i++) {
 					CollisionSelectingApp(&currentScene, GetMousePosition(), blocks[i]);
@@ -120,22 +109,17 @@ int main()
 			}
 			case Paint: {
 				GoBack(currentScene);
-				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				break;
 			}
 			case Calculator: {
 				GoBack(currentScene);
-				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				break;
 			}
 		}
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		// Draws that always appear
 		DrawRectangleRec(taskBarPos, TaskbarColor);
-		DrawText(heure.c_str(), SCREEN_WIDTH - SCREEN_WIDTH/14, SCREEN_HEIGHT - SCREEN_HEIGHT/25,20, WHITE);
-
 		switch (currentScene) {
 			case Desktop: {
 				ClearBackground(DARKGREEN);
@@ -177,7 +161,7 @@ void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Br
 	if (selectedBlockIndex == -1) {
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
-				if (blocks[i].isoccupied && CheckCollisionCircleRec(mousePos,10 ,blocks[i].app.posSize)) {
+				if (blocks[i].isoccupied && CheckCollisionPointRec(mousePos, blocks[i].app.posSize)) {
 					selectedBlockIndex = i;
 					break;
 				}
