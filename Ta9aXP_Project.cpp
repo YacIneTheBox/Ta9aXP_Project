@@ -1,6 +1,6 @@
 // Ta9aXP_Project.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
 //
-
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <raylib.h>
 #include <cmath>
@@ -8,6 +8,10 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"  // see what we can do with this library
+#define _CRT_SECURE_NO_WARNINGS
+
 using namespace std;
 
 typedef enum GameScene {
@@ -40,6 +44,7 @@ void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BL
 void GoBack(GameScene& currentScene);
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos);
+bool ClickDroitGestion(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
 
 int main()
 {
@@ -94,7 +99,8 @@ int main()
 		blocks[idx].app = AllApps[i];
 		blocks[idx].isoccupied = true;
 	}
-
+	int idxClickDroitedApp = -1;
+	bool rightClick = false;
 	while (!WindowShouldClose()) {
 		time_t now = time(nullptr);
 		struct tm tstruct;
@@ -107,17 +113,19 @@ int main()
 		switch (currentScene) {
 			case Desktop:
 			{
-				for (int row = 0; row < N_BLOCKS_VERTICAL; row++) {
-					for (int col = 0; col < N_BLOCKS_HORIZONTAL; col++) {
-						//DrawRectangleLinesEx(blocks[row * N_BLOCKS_HORIZONTAL + col].rect,1, BLACK); // borders 
-					}
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+					rightClick = false; // Reset right click state on left click
 				}
 				MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				
 				for (int i = 0; i < N_BLOCKS_VERTICAL* N_BLOCKS_HORIZONTAL; i++) {
 					CollisionSelectingApp(&currentScene, GetMousePosition(), blocks[i]);
 				}
+				if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && ClickDroitGestion(blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL,idxClickDroitedApp)) {
+					rightClick = true;
+				}
 				
+
 				break;
 			}
 			case Paint: {
@@ -142,6 +150,14 @@ int main()
 			case Desktop: {
 				ClearBackground(DARKGREEN);
 				InitializeDesktopScene(AllApps, nombreApp, blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL);
+				
+				if (rightClick) {
+					float x = blocks[idxClickDroitedApp].rect.x + blocks[idxClickDroitedApp].rect.width / 2;
+					float y = blocks[idxClickDroitedApp].rect.y + blocks[idxClickDroitedApp].rect.height / 2;
+					DrawRectangle(x, y, 150, 30, DARKGRAY);
+					DrawText("Right-clicked on app", x + 5, y + 5, 10, WHITE);
+					cout << x << " " << y << endl;
+				}
 				break;
 			}
 			case Paint: {
@@ -251,5 +267,22 @@ int ClosestPoint(Brick* blocks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Ve
 	}
 	// Si aucun bloc ne contient la position, retourne -1
 	return -1;
+}
+
+bool ClickDroitGestion(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL ,int& idxClickDroitedApp) {
+
+	Vector2 mousePos = GetMousePosition();
+	for (int i = 0; i < N_BLOCK_HORIZONTAL * N_BLOCK_VERTICAL; i++) {
+		if (CheckCollisionPointRec(mousePos, bricks[i].rect) && bricks[i].isoccupied) {
+			// Ici, on peut afficher un menu contextuel ou effectuer une action
+			//DrawRectangleRec(bricks[i].rect, Fade(LIGHTGRAY, 0.5f)); // Juste pour visualiser le clic droit
+			DrawRectangle(mousePos.x, mousePos.y, 150, 30, DARKGRAY);
+			idxClickDroitedApp = i; // Stocke l'index de l'application cliquée
+			cout << "Right-clicked on app: " << bricks[i].app.name << endl;
+			// On pourrait aussi ajouter des options pour fermer l'application, etc.
+			return true;
+		}
+	}
+	return false;
 }
 
