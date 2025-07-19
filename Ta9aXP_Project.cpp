@@ -45,7 +45,7 @@ void GoBack(GameScene& currentScene);
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos);
 bool ClickDroitGestion(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
-void BtnDrawingAndBehave(float x, float y, float width, float height, const string& content,int size);
+bool BtnDrawingAndBehave(float x, float y, float width, float height, const string& content,int size);
 
 
 int main()
@@ -122,7 +122,7 @@ int main()
 				if (!rightClick)MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 
 				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-					rightClick = false; // Reset right click state on left click
+					//rightClick = false; // Reset right click state on left click
 				}
 				
 				
@@ -161,10 +161,26 @@ int main()
 				if (rightClick) {
 					float x = blocks[idxClickDroitedApp].rect.x + blocks[idxClickDroitedApp].rect.width / 2;
 					float y = blocks[idxClickDroitedApp].rect.y + blocks[idxClickDroitedApp].rect.height / 2;
-					BtnDrawingAndBehave(x, y, BTN_WIDTH, BTN_HEIGHT, "Open", BTN_TEXT_SIZE);
-					BtnDrawingAndBehave(x, y+BTN_HEIGHT, BTN_WIDTH, BTN_HEIGHT, "Delete", BTN_TEXT_SIZE);
 
-					cout << x << " " << y << endl;
+					bool clickedOpen = BtnDrawingAndBehave(x, y, BTN_WIDTH, BTN_HEIGHT, "Open", BTN_TEXT_SIZE);
+					bool clickedDelete = BtnDrawingAndBehave(x, y + BTN_HEIGHT, BTN_WIDTH, BTN_HEIGHT, "Delete", BTN_TEXT_SIZE);
+					
+					if (clickedOpen) {
+						// Ouvrir l’application
+						currentScene = blocks[idxClickDroitedApp].app.scene;
+						rightClick = false;
+					}
+					if (clickedDelete) {
+						// Supprimer l’application
+						blocks[idxClickDroitedApp].isoccupied = false;
+						rightClick = false;
+					}
+					// Si on clique ailleurs (clic gauche, et pas sur Open ni Delete)
+					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !clickedOpen && !clickedDelete) {
+						rightClick = false;
+					}
+
+
 				}
 				break;
 			}
@@ -284,7 +300,6 @@ bool ClickDroitGestion(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICA
 		if (CheckCollisionPointRec(mousePos, bricks[i].rect) && bricks[i].isoccupied) {
 			// Ici, on peut afficher un menu contextuel ou effectuer une action
 			idxClickDroitedApp = i; // Stocke l'index de l'application cliquée
-			cout << "Right-clicked on app: " << bricks[i].app.name << endl;
 			// On pourrait aussi ajouter des options pour fermer l'application, etc.
 			return true;
 		}
@@ -292,13 +307,17 @@ bool ClickDroitGestion(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICA
 	return false;
 }
 
-void BtnDrawingAndBehave(float x, float y, float width, float height,const string& content,int size) {
-
+bool BtnDrawingAndBehave(float x, float y, float width, float height, const string& content, int size) {
+	bool hasClicked = false;
 	DrawRectangle(x, y, width, height, DARKGRAY);
 	DrawText(content.c_str(), x + 5, y + 5, size, WHITE);
-	if (CheckCollisionPointRec(GetMousePosition(), { x,y,width,height })) {
+	if (CheckCollisionPointRec(GetMousePosition(), { x, y, width, height })) {
 		DrawRectangle(x, y, width, height, WHITE);
 		DrawText(content.c_str(), x + 5, y + 5, size, DARKGRAY);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			hasClicked = true;
+		}
 	}
+	return hasClicked;
 }
 
