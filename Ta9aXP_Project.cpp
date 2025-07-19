@@ -48,6 +48,7 @@ bool ClickDroitGestion(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTIC
 
 int main()
 {
+	int bite = 120;
 	const int SCREEN_WIDTH = 1200;
 	const int SCREEN_HEIGHT = 890;
 	const int ICON_SIZE = 60;
