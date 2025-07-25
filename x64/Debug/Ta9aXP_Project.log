@@ -1,11 +1,33 @@
 ﻿  Ta9aXP_Project.cpp
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(157,23): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(157,20): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(158,48): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(158,41): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(240,20): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(279,38): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(279,26): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(295,20): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(343,29): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(343,22): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(343,19): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(343,16): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(344,37): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(344,30): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(346,30): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(346,23): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(346,20): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(346,17): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(347,38): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(347,31): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(369,10): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(370,10): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(374,29): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(374,22): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(374,19): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(374,16): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(377,29): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(377,22): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(377,19): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(377,16): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(379,42): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(379,34): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(381,33): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(381,26): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(382,32): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Users\yacai\source\repos\Ta9aXP_Project\Ta9aXP_Project\Ta9aXP_Project.cpp(382,26): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
   Ta9aXP_Project.vcxproj -> C:\Users\yacai\source\repos\Ta9aXP_Project\x64\Debug\Ta9aXP_Project.exe
   'pwsh.exe' n'est pas reconnu en tant que commande interne
   ou externe, un programme exécutable ou un fichier de commandes.

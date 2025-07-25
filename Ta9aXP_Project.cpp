@@ -44,16 +44,18 @@ void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BL
 void GoBack(GameScene& currentScene);
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos);
-bool ClickDroitGestion(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
+bool ClickDroitGestionApp(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
 bool BtnDrawingAndBehave(float x, float y, float width, float height, const string& content,int size);
+int ClickDroitGestionDesktop(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL);
+void DrawingBackGroundSelection();
 
 
 int main()
 {
-	const int SCREEN_WIDTH = 1200;
-	const int SCREEN_HEIGHT = 890;
+	const int SCREEN_WIDTH = 1600;
+	const int SCREEN_HEIGHT = 900;
 	const int ICON_SIZE = 60;
-	const int BLOCK_SIZE = 120;
+	const int BLOCK_SIZE = SCREEN_HEIGHT / 7 - 50/7;
 	const int N_BLOCKS_HORIZONTAL = SCREEN_WIDTH / BLOCK_SIZE;
 	const int N_BLOCKS_VERTICAL = SCREEN_HEIGHT / BLOCK_SIZE;
 	const float BTN_WIDTH = 140;
@@ -105,7 +107,11 @@ int main()
 		blocks[idx].isoccupied = true;
 	}
 	int idxClickDroitedApp = -1;
-	bool rightClick = false;
+	bool rightClickApp = false;
+	bool rightClickDesktop = false;
+	int emptySelecBlock = -1;
+	bool showChangingWindowBg = false;
+	Color DesktopColor = DARKGREEN;
 	while (!WindowShouldClose()) {
 		time_t now = time(nullptr);
 		struct tm tstruct;
@@ -119,18 +125,17 @@ int main()
 			case Desktop:
 			{
 				// order is important here 
-				if (!rightClick)MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 
-				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-					//rightClick = false; // Reset right click state on left click
-				}
+				if (!rightClickApp)MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 				
 				
 				for (int i = 0; i < N_BLOCKS_VERTICAL* N_BLOCKS_HORIZONTAL; i++) {
 					CollisionSelectingApp(&currentScene, GetMousePosition(), blocks[i]);
 				}
-				if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && ClickDroitGestion(blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL,idxClickDroitedApp)) {
-					rightClick = true;
+
+				if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) ) {
+					rightClickApp = ClickDroitGestionApp(blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL, idxClickDroitedApp);
+					emptySelecBlock = ClickDroitGestionDesktop(blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL);
 				}
 				
 				break;
@@ -155,10 +160,36 @@ int main()
 
 		switch (currentScene) {
 			case Desktop: {
-				ClearBackground(DARKGREEN);
+				ClearBackground(DesktopColor);
 				InitializeDesktopScene(AllApps, nombreApp, blocks, N_BLOCKS_HORIZONTAL, N_BLOCKS_VERTICAL);
 				
-				if (rightClick) {
+				if (emptySelecBlock != -1) {
+					float x = blocks[emptySelecBlock].rect.x + blocks[emptySelecBlock].rect.width / 2;
+					float y = blocks[emptySelecBlock].rect.y + blocks[emptySelecBlock].rect.height / 2;
+
+					bool clickedRefresh = BtnDrawingAndBehave(x, y, BTN_WIDTH, BTN_HEIGHT, "Refresh", BTN_TEXT_SIZE);
+					bool clickedChangeBackground = BtnDrawingAndBehave(x, y + BTN_HEIGHT, BTN_WIDTH, BTN_HEIGHT, "Change Background", BTN_TEXT_SIZE);
+
+					if (clickedRefresh) {
+						cout << "Refreshed!" << endl;
+						emptySelecBlock = -1; // Reset the empty selection block
+					}
+					if (clickedChangeBackground) { // Reset the empty selection block
+						showChangingWindowBg = true;
+						emptySelecBlock = -1;
+					}
+					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !clickedRefresh && !clickedChangeBackground) {
+						cout << "Clicked outside the empty selection block menu." << endl;
+						emptySelecBlock = -1;
+					}
+				}
+
+				if (showChangingWindowBg) {
+					DrawingBackGroundSelection();
+
+				}
+
+				if (rightClickApp) {
 					float x = blocks[idxClickDroitedApp].rect.x + blocks[idxClickDroitedApp].rect.width / 2;
 					float y = blocks[idxClickDroitedApp].rect.y + blocks[idxClickDroitedApp].rect.height / 2;
 
@@ -168,18 +199,18 @@ int main()
 					if (clickedOpen) {
 						// Ouvrir l’application
 						currentScene = blocks[idxClickDroitedApp].app.scene;
-						rightClick = false;
+						rightClickApp = false;
 					}
 					if (clickedDelete) {
 						// Supprimer l’application
 						blocks[idxClickDroitedApp].isoccupied = false;
-						rightClick = false;
+						rightClickApp = false;
 					}
 					// Si on clique ailleurs (clic gauche, et pas sur Open ni Delete)
 					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !clickedOpen && !clickedDelete) {
-						rightClick = false;
+						rightClickApp = false;
 					}
-
+		
 
 				}
 				break;
@@ -293,7 +324,7 @@ int ClosestPoint(Brick* blocks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Ve
 	return -1;
 }
 
-bool ClickDroitGestion(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL ,int& idxClickDroitedApp) {
+bool ClickDroitGestionApp(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL ,int& idxClickDroitedApp) {
 
 	Vector2 mousePos = GetMousePosition();
 	for (int i = 0; i < N_BLOCK_HORIZONTAL * N_BLOCK_VERTICAL; i++) {
@@ -319,5 +350,49 @@ bool BtnDrawingAndBehave(float x, float y, float width, float height, const stri
 		}
 	}
 	return hasClicked;
+}
+
+int ClickDroitGestionDesktop(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL) {
+	Vector2 mousePos = GetMousePosition();
+	for (int i = 0; i < N_BLOCK_HORIZONTAL * N_BLOCK_VERTICAL; i++) {
+		if (CheckCollisionPointRec(mousePos, bricks[i].rect) && !bricks[i].isoccupied) {
+			cout << "Right click on empty block at index: " << i << endl;
+			return i;
+		}
+		
+	}
+	return -1;
+
+}
+
+void DrawingBackGroundSelection() {
+	float x = GetScreenWidth() / 2 - 250;
+	float y = GetScreenHeight() / 2 - 250;
+	float width = 500;
+	float height = 500;
+	// fond fenetre
+	DrawRectangle(x, y, width, height, Fade(GRAY, 0.9f)); // Fond semi-transparent
+	// barre de titre de la fenetre
+	float barreTitleHeight = 50;
+	DrawRectangle(x, y, width, barreTitleHeight, DARKBLUE); // Barre de titre
+	// Texte de la barre de titre
+	DrawText("Change Background", x + 10, y + 10, 20, WHITE);
+	// interaction btns
+	DrawRectangle(x + width - 100, y, 50, 50, WHITE); // Bouton Full screen
+	DrawRectangle(x + width - 50, y, 50, 50, RED); // Bouton Close
+
+
+	//comportement de la fenetre 
+	if (CheckCollisionPointRec(GetMousePosition(), { x,y,width,barreTitleHeight })) {
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			cout << "Dragging the window" << endl;
+			Vector2 mousePos = GetMousePosition();
+			x = mousePos.x - width / 2; // Centrer la fenêtre sur le curseur
+			y = mousePos.y - barreTitleHeight / 2; // Ajuster la position verticale
+		}
+	}
+
+	// drag the window
+	
 }
 
