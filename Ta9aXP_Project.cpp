@@ -47,7 +47,7 @@ int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vec
 bool ClickDroitGestionApp(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
 bool BtnDrawingAndBehave(float x, float y, float width, float height, const string& content,int size);
 int ClickDroitGestionDesktop(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL);
-void DrawingBackGroundSelection();
+Vector2 DrawingBackGroundSelection(float x, float y);
 
 
 int main()
@@ -112,6 +112,7 @@ int main()
 	int emptySelecBlock = -1;
 	bool showChangingWindowBg = false;
 	Color DesktopColor = DARKGREEN;
+	Vector2 BgColPosition = { GetScreenWidth() / 2 - 250, GetScreenHeight() / 2 - 250 };
 	while (!WindowShouldClose()) {
 		time_t now = time(nullptr);
 		struct tm tstruct;
@@ -183,9 +184,9 @@ int main()
 						emptySelecBlock = -1;
 					}
 				}
-
+				
 				if (showChangingWindowBg) {
-					DrawingBackGroundSelection();
+					BgColPosition = DrawingBackGroundSelection(BgColPosition.x, BgColPosition.y);
 
 				}
 
@@ -365,11 +366,9 @@ int ClickDroitGestionDesktop(Brick* bricks,int N_BLOCK_HORIZONTAL, int N_BLOCK_V
 
 }
 
-void DrawingBackGroundSelection() {
-	float x = GetScreenWidth() / 2 - 250;
-	float y = GetScreenHeight() / 2 - 250;
+Vector2 DrawingBackGroundSelection(float x,float y) {
 	float width = 500;
-	float height = 500;
+	float height =500;
 	// fond fenetre
 	DrawRectangle(x, y, width, height, Fade(GRAY, 0.9f)); // Fond semi-transparent
 	// barre de titre de la fenetre
@@ -381,17 +380,22 @@ void DrawingBackGroundSelection() {
 	DrawRectangle(x + width - 100, y, 50, 50, WHITE); // Bouton Full screen
 	DrawRectangle(x + width - 50, y, 50, 50, RED); // Bouton Close
 
-
+	bool isDragged = false;
 	//comportement de la fenetre 
-	if (CheckCollisionPointRec(GetMousePosition(), { x,y,width,barreTitleHeight })) {
-		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			cout << "Dragging the window" << endl;
-			Vector2 mousePos = GetMousePosition();
-			x = mousePos.x - width / 2; // Centrer la fenêtre sur le curseur
-			y = mousePos.y - barreTitleHeight / 2; // Ajuster la position verticale
-		}
+	if (CheckCollisionPointRec(GetMousePosition(), { x,y,width,barreTitleHeight }) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		isDragged = true;
 	}
-
+	if (isDragged && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+		cout << "Dragging the window" << endl;
+		Vector2 mousePos = GetMousePosition();
+		x = mousePos.x - width / 2; // Centrer la fenêtre sur le curseur
+		y = mousePos.y - barreTitleHeight / 2; // Ajuster la position verticale
+		return { x, y }; // Retourner la nouvelle position de la fenêtre
+	}
+	else {
+		isDragged = false; // Réinitialiser le drapeau de glissement
+		return { x, y }; // Retourner la position actuelle de la fenêtre
+	}
 	// drag the window
 	
 }
