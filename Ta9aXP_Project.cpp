@@ -10,7 +10,8 @@
 #include <sstream>
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"  // see what we can do with this library
-#define _CRT_SECURE_NO_WARNINGS
+
+#include "Window.h"
 
 using namespace std;
 
@@ -28,6 +29,8 @@ typedef struct App {
 	Rectangle posSize = {0,0,60 ,60 };
 
 }App;
+
+
 
 typedef struct Brick {
 	Rectangle rect = {0,0,0,0};
@@ -66,6 +69,10 @@ int main()
 
 	Rectangle taskBarPos = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 	Color TaskbarColor = DARKGRAY;
+
+
+	Window ChangeBgWin;
+	ChangeBgWin.init({ 0,0,0,0 }, DARKBLUE, "Change bg", false);
 
 	int nombreApp =9;
 	App *AllApps = new App[nombreApp]{
@@ -186,7 +193,7 @@ int main()
 				}
 				
 				if (showChangingWindowBg) {
-					BgColPosition = DrawingBackGroundSelection(BgColPosition.x, BgColPosition.y);
+					BgColPosition = ChangeBgWin.Draw(BgColPosition.x, BgColPosition.y);
 
 				}
 
@@ -396,7 +403,5 @@ Vector2 DrawingBackGroundSelection(float x,float y) {
 		isDragged = false; // Réinitialiser le drapeau de glissement
 		return { x, y }; // Retourner la position actuelle de la fenêtre
 	}
-	// drag the window
-	
 }
 
