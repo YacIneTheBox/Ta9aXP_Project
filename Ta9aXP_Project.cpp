@@ -16,6 +16,13 @@ typedef enum GameScene {
 	Calculator,
 }GameScene;
 
+typedef struct Window {
+	Rectangle rect;
+	Color color;
+	string title;
+	bool isOpen = true; // Pour savoir si la fenêtre est ouverte
+}Window;
+
 typedef struct App {
 	string name;
 	GameScene scene;
@@ -38,7 +45,7 @@ void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BL
 void GoBack(GameScene& currentScene);
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vector2 appPos);
-
+ 
 int main()
 {
 	const int SCREEN_WIDTH = 1200;
