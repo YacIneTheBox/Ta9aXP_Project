@@ -28,7 +28,6 @@ typedef struct App {
 }App;
 
 
-
 typedef struct Brick {
 	Rectangle rect = { 0,0,0,0 };
 	bool isoccupied = false;
