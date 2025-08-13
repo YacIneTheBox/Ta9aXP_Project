@@ -119,7 +119,7 @@ int main()
 	int emptySelecBlock = -1;
 	bool showChangingWindowBg = false;
 	Color DesktopColor = DARKGREEN;
-	Vector2 BgColPosition = { GetScreenWidth() / 2 - 250, GetScreenHeight() / 2 - 250 };
+	Rectangle BgColPosition = { GetScreenWidth() / 2 - 250, GetScreenHeight() / 2 - 250 ,500,500};
 	while (!WindowShouldClose()) {
 		time_t now = time(nullptr);
 		struct tm tstruct;
@@ -195,9 +195,9 @@ int main()
 					emptySelecBlock = -1;
 				}
 			}
-
+			// for the changing bg window
 			if (ChangeBgWin.isOpen) {
-				BgColPosition = ChangeBgWin.Draw(BgColPosition.x, BgColPosition.y);
+				BgColPosition = ChangeBgWin.Draw(BgColPosition.x, BgColPosition.y,BgColPosition.width,BgColPosition.height,&DesktopColor);
 			}
 
 			if (rightClickApp) {
