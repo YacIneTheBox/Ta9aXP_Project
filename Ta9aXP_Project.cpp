@@ -46,6 +46,7 @@ int ClosestPoint(Brick* block, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, Vec
 bool ClickDroitGestionApp(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL, int& idxClickDroitedApp);
 bool BtnDrawingAndBehave(float x, float y, float width, float height, const string& content, int size);
 int ClickDroitGestionDesktop(Brick* bricks, int N_BLOCK_HORIZONTAL, int N_BLOCK_VERTICAL);
+bool IsAppHovered(int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks);
 
 
 int main()
@@ -65,9 +66,12 @@ int main()
 	Rectangle taskBarPos = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 	Color TaskbarColor = DARKGRAY;
 
-
+	// windows : 
 	ChangeBgWindow ChangeBgWin;
 	ChangeBgWin.init({ 0,0,0,0 }, DARKBLUE, "Change bg", false);
+
+	NotePadWindow NotePadWin;
+	NotePadWin.init({ 0,0,0,0 }, WHITE, "Notepad", false);
 
 	int nombreApp = 9;
 	App* AllApps = new App[nombreApp]{
@@ -120,6 +124,7 @@ int main()
 	bool showChangingWindowBg = false;
 	Color DesktopColor = DARKGREEN;
 	Rectangle BgColPosition = { GetScreenWidth() / 2 - 250, GetScreenHeight() / 2 - 250 ,500,500};
+	bool blockedByLayer = false;
 	while (!WindowShouldClose()) {
 		time_t now = time(nullptr);
 		struct tm tstruct;
@@ -135,7 +140,7 @@ int main()
 		{
 			// order is important here 
 
-			if (!rightClickApp)MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
+			if (!rightClickApp && !blockedByLayer)MovingApps(AllApps, N_BLOCKS_VERTICAL, N_BLOCKS_HORIZONTAL, blocks);
 
 
 			for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
@@ -195,10 +200,18 @@ int main()
 					emptySelecBlock = -1;
 				}
 			}
+			blockedByLayer = false;
 			// for the changing bg window
 			if (ChangeBgWin.isOpen) {
 				BgColPosition = ChangeBgWin.Draw(BgColPosition.x, BgColPosition.y,BgColPosition.width,BgColPosition.height,&DesktopColor);
+				if (CheckCollisionPointRec(GetMousePosition(), BgColPosition) && IsAppHovered(N_BLOCKS_VERTICAL,N_BLOCKS_HORIZONTAL,blocks)) {
+					blockedByLayer = true;
+				}
+				else {
+					blockedByLayer = false;
+				}
 			}
+
 
 			if (rightClickApp) {
 				float x = blocks[idxClickDroitedApp].rect.x + blocks[idxClickDroitedApp].rect.width / 2;
@@ -251,6 +264,15 @@ void InitializeDesktopScene(App* AllApps, int nombreApp, Brick* blocks, int N_BL
 			DrawRectangleRec(blocks[i].app.posSize, blocks[i].app.iconColor);
 		}
 	}
+}
+
+bool IsAppHovered(int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks){
+	for (int i = 0; i < N_BLOCKS_VERTICAL * N_BLOCKS_HORIZONTAL; i++) {
+		if (CheckCollisionPointRec(GetMousePosition(), blocks[i].rect)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void MovingApps(App* AllApps, int N_BLOCKS_VERTICAL, int N_BLOCKS_HORIZONTAL, Brick* blocks) {

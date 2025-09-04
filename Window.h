@@ -2,6 +2,9 @@
 #define WINDOW_H	
 #include "raylib.h"
 #include <string>
+
+#define MAX_INPUT_CHARS 100
+
 using namespace std;
 class Window
 {
@@ -58,6 +61,21 @@ public:
         }
         return { dragingZone.x ,dragingZone.y,dragingZone.width,dragingZone.height };
     }
+
+    Rectangle Resize(Rectangle max_reducBtn,float barreTitleHeight) {
+        // --- reduc/maximize button ---
+        if (CheckCollisionPointRec(GetMousePosition(), max_reducBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            // Toggle between maximized and normal size
+            if (rect.width == 500 && rect.height == 500) {
+                return { 0,0,(float)GetScreenWidth(), GetScreenHeight() - barreTitleHeight };
+                
+            }
+            else {
+				return { 0,0,500,500 };
+            }
+        }
+    }
+
 };
 class ChangeBgWindow : public Window {
 private:
@@ -107,6 +125,21 @@ public:
         // --- Close button click ---
 		ClosingWindow(closingBtn);
 
+        // --- reduc/maximize button ---
+    // --- reduc/maximize button ---
+        if (CheckCollisionPointRec(GetMousePosition(), max_reducBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            // Toggle between maximized and normal size
+            if (width == 500 && height == 500) {
+                width = GetScreenWidth();
+                height = GetScreenHeight() - barreTitleHeight;
+                x = 0;
+                y = 0;
+            }
+            else {
+                width = 500;
+                height = 500;
+            }
+        }
         // --- Start dragging ---
         Rectangle newRect;
         newRect = DragingWindow({ x,y,width,barreTitleHeight });
@@ -114,25 +147,67 @@ public:
 		y = newRect.y;
 
 
-		// --- reduc/maximize button ---
-        if (CheckCollisionPointRec(GetMousePosition(), max_reducBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            // Toggle between maximized and normal size
-            if (width == 500 && height == 500) {
-                width = GetScreenWidth();
-                height = GetScreenHeight() - barreTitleHeight;
-				x = 0;
-				y = 0;
-            } else {
-                width = 500;
-                height = 500;
-            }
-		}
+
 		rect.width = width;
 		rect.height = height;
         rect.x = x;
         rect.y = y;
         return { x, y,width,height };
     }
+};
+
+
+class NotePadWindow : public Window {
+    private:
+        string text = "";
+        int letterCount = 0;
+        bool mouseOnTextArea = false;
+		Rectangle textArea = { 0,0,580,400 };
+        Rectangle rect = { 0,0,600,500 };
+        int framesCounter = 0;
+    public:
+        Rectangle Draw(float x, float y, float width ,float height){
+            if (CheckCollisionPointRec(GetMousePosition(),textArea)) mouseOnTextArea = true;
+			else mouseOnTextArea = false;
+
+            if (mouseOnTextArea) {
+				SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+				int key = GetKeyPressed();
+                while (key > 0) {
+                    if (letterCount < MAX_INPUT_CHARS) {
+						text[letterCount] = (char)key;
+						text + "\0";
+						letterCount++;
+                    }
+					key = GetKeyPressed();  // Check next character in the queue
+                }
+                if (IsKeyPressed(KEY_BACKSPACE)) {
+                    letterCount--;
+                    if (letterCount < 0) letterCount = 0;
+                    text = text.substr(0, letterCount);
+				}
+            }
+            else {
+				SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            }
+            if (mouseOnTextArea) framesCounter++;
+			else framesCounter = 0;
+           
+            // drawing 
+
+            DrawRectangleRec({ textArea.x, textArea.y, textArea.width, textArea.height },DARKGRAY);
+			DrawText(text.c_str(), textArea.x + 5, textArea.y + 5, 50, WHITE);
+
+
+			return { x, y,width,height };
+        }
+
+
+
+        
+
+        
 };
 
 
